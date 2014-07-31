@@ -1,0 +1,66 @@
+#!/bin/tcsh -v
+
+if ($#argv < 5) then
+	echo "usage: pdqBLAST_execute_work_unit <job_id> <work_unit_number> <blast program> <blast threads> <blast db> <temporary directory> [<blast arguments> ...]"
+	exit 1
+endif
+
+# get command line arguments
+set job_id = $argv[1]
+set work_unit_number = $argv[2]
+set program = $argv[3]
+set blast_threads = $argv[4]
+set blast_db = $argv[5]
+set temporary_directory = $argv[6]
+shift; shift; shift; shift; shift; shift;
+set blast_arguments = "$argv"
+
+# load configuration for pdqBLAST
+if ( ! -r ~/.pdqBLASTrc ) then
+	echo "ERROR: unable to find or read configuration file for pdqBLAST (expected as ~/.pdqBLASTrc)" > /dev/stderr
+	exit 1
+endif
+source ~/.pdqBLASTrc
+
+# assemble work unit input filename
+set work_unit_input_file = query_work_unit_$work_unit_number.fasta
+
+# create local temp space and assemble output filenames
+set work_unit_temporary_directory = `mktemp -d -p $PDQBLAST_NODE_LOCAL_SCRATCH pdqBLAST.job_$job_id.$work_unit_number.XXXXXXXXXX`
+set stagelogfile = work_unit_${work_unit_number}_stage.log
+set blastlogfile = work_unit_${work_unit_number}_blast.log
+set cleanuplogfile = work_unit_${work_unit_number}_cleanup.log
+set resultsfile = $work_unit_temporary_directory/work_unit_${work_unit_number}_BLAST.out
+
+# set status for this work unit to staging
+pdqBLAST_update_work_unit_status $job_id $work_unit_number staging `hostname` $work_unit_temporary_directory
+
+# copy database and work unit fasta to local temp space
+\cp -v $PDQBLAST_DATABASE_PATH/$blast_db.* $temporary_directory/$work_unit_input_file $work_unit_temporary_directory >& $work_unit_temporary_directory/$stagelogfile
+# copy log file to shared temporary directory for loading
+\cp $work_unit_temporary_directory/$stagelogfile $temporary_directory
+pdqBLAST_load_work_unit_log $job_id $work_unit_number stage $temporary_directory/$stagelogfile
+
+# run work unit
+pdqBLAST_update_work_unit_status $job_id $work_unit_number running
+cd $work_unit_temporary_directory
+echo $program -num_threads $blast_threads -db $blast_db -query $work_unit_temporary_directory/$work_unit_input_file -out $resultsfile -outfmt 6 $blast_arguments > $work_unit_temporary_directory/$blastlogfile
+#$program -num_threads $blast_threads -db $blast_db -query $work_unit_temporary_directory/$work_unit_input_file -out $resultsfile -outfmt 6 $blast_arguments >>& $work_unit_temporary_directory/$blastlogfile
+$program -db $blast_db -query $work_unit_temporary_directory/$work_unit_input_file -out $resultsfile -outfmt 6 $blast_arguments >>& $work_unit_temporary_directory/$blastlogfile
+cd /tmp
+
+# load log and result set
+pdqBLAST_update_work_unit_status $job_id $work_unit_number loading
+\cp $work_unit_temporary_directory/$blastlogfile $temporary_directory
+pdqBLAST_load_work_unit_log $job_id $work_unit_number blast $temporary_directory/$blastlogfile
+pdqBLAST_load_work_unit_blast_results $job_id $work_unit_number $resultsfile
+
+# cleanup
+pdqBLAST_update_work_unit_status $job_id $work_unit_number cleanup
+\rm -v $work_unit_temporary_directory/$stagelogfile $resultsfile $temporary_directory/$blastlogfile $work_unit_temporary_directory/$work_unit_input_file $work_unit_temporary_directory/$blast_db.* >& $work_unit_temporary_directory/$cleanuplogfile
+\cp $work_unit_temporary_directory/$cleanuplogfile $temporary_directory
+pdqBLAST_load_work_unit_log $job_id $work_unit_number cleanup $temporary_directory/$cleanuplogfile
+
+# finalize cleanup
+\rm -rf $work_unit_temporary_directory
+pdqBLAST_update_work_unit_status $job_id $work_unit_number complete

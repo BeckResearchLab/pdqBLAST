@@ -1,0 +1,23 @@
+#!/bin/tcsh
+
+# load configuration for pdqBLAST
+if ( ! -r ~/.pdqBLASTrc ) then
+	echo "ERROR: unable to find or read configuration file for pdqBLAST (expected as ~/.pdqBLASTrc)" > /dev/stderr
+	exit 1
+endif
+source ~/.pdqBLASTrc
+
+if ($#argv != 1) then
+	echo "usage: pdqBLAST_job_status <job_id>"
+	exit 1
+endif
+
+set job_id = $argv[1]
+
+set table = `echo "SELECT output_table FROM master_job WHERE job_id = $job_id;" | mysql -h $PDQBLAST_MYSQL_HOST pdqBLAST -s`
+
+cat << EOF | mysql -h $PDQBLAST_MYSQL_HOST pdqBLAST
+DELETE FROM $table;
+UPDATE master_job SET status_id = 2, started = NULL, completed = NULL, submitted = NOW() WHERE job_id = $job_id;
+UPDATE master_work_unit SET status_id = 1, script_filename = NULL, script = NULL, scheduler_id = NULL, node = NULL, submitted = NULL, started = NULL, staging_completed = NULL, running_completed = NULL, loading_completed = NULL, completed = NULL, stage_log = NULL, blast_log = NULL, cleanup_log = NULL WHERE job_id = $job_id;
+EOF

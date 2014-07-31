@@ -1,0 +1,177 @@
+[1] 30215
+[2] 30216
+[3] 30217
+program = blastn
+blast_arguments = -ungapped -word_size 75
+blast_threads = 8
+blast_db = RDP_release10_20
+input = /gscratch/lidstrom/data/meta2/methylamine.fasta
+work_units = 42
+output_table = meta.meta2_methylamine_blast_RDP
+checking if table meta.meta2_methylamine_blast_RDP exists
+program = blastn
+blast_arguments = -ungapped -word_size 75
+blast_threads = 8
+blast_db = RDP_release10_20
+input = /gscratch/lidstrom/data/meta2/formaldehyde.fasta
+work_units = 42
+output_table = meta.meta2_formaldehyde_blast_RDP
+checking if table meta.meta2_formaldehyde_blast_RDP exists
+checking if blastn exists
+checking if blastn exists
+program = blastn
+blast_arguments = -ungapped -word_size 75
+blast_threads = 8
+blast_db = RDP_release10_20
+input = /gscratch/lidstrom/data/meta2/methanol.fasta
+work_units = 42
+output_table = meta.meta2_methanol_blast_RDP
+checking if table meta.meta2_methanol_blast_RDP exists
+if thread count is valid on the lower bound
+checking /gscratch/lidstrom/data/meta2/methylamine.fasta fasta file
+if thread count is valid on the lower bound
+checking /gscratch/lidstrom/data/meta2/formaldehyde.fasta fasta file
+checking if blastn exists
+if thread count is valid on the lower bound
+checking /gscratch/lidstrom/data/meta2/methanol.fasta fasta file
+found 16969332 sequences in file /gscratch/lidstrom/data/meta2/methanol.fasta
+found 7 files matching blast database prefix RDP_release10_20
+job_id =
+temporary_directory = /gscratch/escience/dacb/pdqBLAST/tmp/pdqBLAST.job_.OiKuw30393
+splitting /gscratch/lidstrom/data/meta2/methanol.fasta into 42 chunks into files in /gscratch/escience/dacb/pdqBLAST/tmp/pdqBLAST.job_.OiKuw30393
+found 17444594 sequences in file /gscratch/lidstrom/data/meta2/methylamine.fasta
+found 7 files matching blast database prefix RDP_release10_20
+job_id = 2
+temporary_directory = /gscratch/escience/dacb/pdqBLAST/tmp/pdqBLAST.job_2.DDyZP30444
+splitting /gscratch/lidstrom/data/meta2/methylamine.fasta into 42 chunks into files in /gscratch/escience/dacb/pdqBLAST/tmp/pdqBLAST.job_2.DDyZP30444
+found 18215972 sequences in file /gscratch/lidstrom/data/meta2/formaldehyde.fasta
+found 7 files matching blast database prefix RDP_release10_20
+job_id =
+temporary_directory = /gscratch/escience/dacb/pdqBLAST/tmp/pdqBLAST.job_.EEgJZ30498
+splitting /gscratch/lidstrom/data/meta2/formaldehyde.fasta into 42 chunks into files in /gscratch/escience/dacb/pdqBLAST/tmp/pdqBLAST.job_.EEgJZ30498
+work unit 1 has scheduler ID 12768
+work unit 2 has scheduler ID 12769
+work unit 3 has scheduler ID 12770
+work unit 4 has scheduler ID 12771
+work unit 5 has scheduler ID 12772
+work unit 6 has scheduler ID 12773
+work unit 1 has scheduler ID 12774
+work unit 7 has scheduler ID 12775
+work unit 2 has scheduler ID 12776
+work unit 8 has scheduler ID 12777
+work unit 3 has scheduler ID 12778
+work unit 9 has scheduler ID 12779
+work unit 4 has scheduler ID 12780
+work unit 10 has scheduler ID 12781
+work unit 11 has scheduler ID 12782
+work unit 5 has scheduler ID 12783
+work unit 6 has scheduler ID 12784
+work unit 12 has scheduler ID 12785
+work unit 1 has scheduler ID 12786
+work unit 7 has scheduler ID 12787
+work unit 13 has scheduler ID 12788
+work unit 2 has scheduler ID 12789
+work unit 14 has scheduler ID 12790
+work unit 3 has scheduler ID 12792
+work unit 8 has scheduler ID 12791
+work unit 4 has scheduler ID 12794
+work unit 15 has scheduler ID 12793
+work unit 9 has scheduler ID 12795
+work unit 5 has scheduler ID 12797
+work unit 16 has scheduler ID 12796
+work unit 10 has scheduler ID 12798
+work unit 6 has scheduler ID 12799
+work unit 17 has scheduler ID 12800
+work unit 11 has scheduler ID 12801
+work unit 18 has scheduler ID 12802
+work unit 7 has scheduler ID 12803
+work unit 12 has scheduler ID 12804
+work unit 19 has scheduler ID 12805
+work unit 20 has scheduler ID 12808
+work unit 8 has scheduler ID 12807
+work unit 13 has scheduler ID 12806
+work unit 21 has scheduler ID 12809
+work unit 14 has scheduler ID 12811
+work unit 9 has scheduler ID 12810
+work unit 22 has scheduler ID 12812
+work unit 15 has scheduler ID 12814
+work unit 10 has scheduler ID 12813
+work unit 23 has scheduler ID 12815
+work unit 11 has scheduler ID 12816
+work unit 16 has scheduler ID 12817
+work unit 24 has scheduler ID 12818
+work unit 12 has scheduler ID 12819
+work unit 17 has scheduler ID 12821
+work unit 25 has scheduler ID 12820
+work unit 13 has scheduler ID 12822
+work unit 14 has scheduler ID 12823
+work unit 18 has scheduler ID 12824
+work unit 26 has scheduler ID 12825
+work unit 15 has scheduler ID 12826
+work unit 27 has scheduler ID 12828
+work unit 19 has scheduler ID 12827
+work unit 16 has scheduler ID 12829
+work unit 28 has scheduler ID 12830
+work unit 20 has scheduler ID 12831
+work unit 17 has scheduler ID 12832
+work unit 21 has scheduler ID 12833
+work unit 29 has scheduler ID 12834
+work unit 18 has scheduler ID 12835
+work unit 30 has scheduler ID 12837
+work unit 22 has scheduler ID 12836
+work unit 23 has scheduler ID 12838
+work unit 19 has scheduler ID 12839
+work unit 31 has scheduler ID 12840
+work unit 32 has scheduler ID 12841
+work unit 20 has scheduler ID 12842
+work unit 24 has scheduler ID 12843
+work unit 33 has scheduler ID 12845
+work unit 25 has scheduler ID 12846
+work unit 21 has scheduler ID 12844
+work unit 34 has scheduler ID 12847
+work unit 26 has scheduler ID 12848
+work unit 22 has scheduler ID 12849
+work unit 35 has scheduler ID 12852
+work unit 27 has scheduler ID 12851
+work unit 23 has scheduler ID 12850
+work unit 24 has scheduler ID 12853
+work unit 36 has scheduler ID 12854
+work unit 28 has scheduler ID 12855
+work unit 25 has scheduler ID 12856
+work unit 37 has scheduler ID 12857
+work unit 29 has scheduler ID 12858
+work unit 26 has scheduler ID 12859
+work unit 38 has scheduler ID 12860
+work unit 30 has scheduler ID 12861
+work unit 27 has scheduler ID 12862
+work unit 39 has scheduler ID 12863
+work unit 31 has scheduler ID 12864
+work unit 28 has scheduler ID 12866
+work unit 40 has scheduler ID 12865
+work unit 32 has scheduler ID 12867
+work unit 29 has scheduler ID 12868
+work unit 41 has scheduler ID 12869
+work unit 33 has scheduler ID 12870
+work unit 34 has scheduler ID 12873
+work unit 42 has scheduler ID 12872
+work unit 30 has scheduler ID 12871
+work unit 35 has scheduler ID 12875
+work unit 31 has scheduler ID 12874
+work unit 36 has scheduler ID 12876
+work unit 32 has scheduler ID 12877
+work unit 33 has scheduler ID 12879
+work unit 37 has scheduler ID 12878
+work unit 34 has scheduler ID 12880
+work unit 38 has scheduler ID 12881
+work unit 35 has scheduler ID 12883
+work unit 39 has scheduler ID 12882
+work unit 40 has scheduler ID 12885
+work unit 36 has scheduler ID 12884
+work unit 41 has scheduler ID 12886
+work unit 37 has scheduler ID 12887
+work unit 38 has scheduler ID 12888
+work unit 42 has scheduler ID 12889
+work unit 39 has scheduler ID 12890
+work unit 40 has scheduler ID 12891
+work unit 41 has scheduler ID 12892
+work unit 42 has scheduler ID 12893

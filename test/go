@@ -1,0 +1,4 @@
+#!/bin/tcsh
+
+# pdqBLAST -p <blast program> -d <blast database> -i <blast query FASTA> -w <# of work units> -t <threads per work unit> -o <output table> -- [<blast options> ...]
+pdqBLAST -p blastn -d test -i query.fasta -w 8 -t 1 -o mm.test_output_table -- -word_size 75

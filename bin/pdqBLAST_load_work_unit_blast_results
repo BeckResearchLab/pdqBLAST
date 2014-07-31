@@ -1,0 +1,24 @@
+#!/bin/tcsh
+
+# load configuration for pdqBLAST
+if ( ! -r ~/.pdqBLASTrc ) then
+	echo "ERROR: unable to find or read configuration file for pdqBLAST (expected as ~/.pdqBLASTrc)" > /dev/stderr
+	exit 1
+endif
+source ~/.pdqBLASTrc
+
+# validate arguments
+set usage = "usage: pdqBLAST_load_work_unit_blast_results <job_id> <work_unit_number> <results filename>"
+if ($#argv != 3) then
+	echo $usage > /dev/stderr
+	exit 1
+endif
+
+set job_id = $argv[1]
+set work_unit_number = $argv[2]
+set blast_results_filename = $argv[3]
+set output_table = `echo "SELECT output_table FROM master_job WHERE job_id=$job_id;" | mysql -s -h $PDQBLAST_MYSQL_HOST pdqBLAST`
+
+mysql -h $PDQBLAST_MYSQL_HOST pdqBLAST --local-infile=1 << EOF
+LOAD DATA LOCAL INFILE '$blast_results_filename' INTO TABLE $output_table FIELDS TERMINATED BY '\t';
+EOF

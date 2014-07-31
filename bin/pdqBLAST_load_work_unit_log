@@ -1,0 +1,36 @@
+#!/bin/tcsh
+
+# load configuration for pdqBLAST
+if ( ! -r ~/.pdqBLASTrc ) then
+	echo "ERROR: unable to find or read configuration file for pdqBLAST (expected as ~/.pdqBLASTrc)" > /dev/stderr
+	exit 1
+endif
+source ~/.pdqBLASTrc
+
+# validate arguments
+set usage = "usage: pdqBLAST_load_work_unit_log <job_id> <work_unit_number> <'stage'|'blast'|'cleanup'> <log filename>"
+if ($#argv != 4) then
+	echo $usage > /dev/stderr
+	exit 1
+endif
+
+set job_id = $argv[1]
+set work_unit_number = $argv[2]
+set which = $argv[3]
+set log_filename = $argv[4]
+
+switch ($which)
+	case stage:
+	case blast:
+	case cleanup:
+		echo "CALL job_work_unit_load_${which}_log($job_id, $work_unit_number, '$log_filename');" | mysql -h $PDQBLAST_MYSQL_HOST pdqBLAST
+		exit 0
+		breaksw;
+	default:
+		breaksw;
+endsw
+
+echo $argv
+
+echo $usage > /dev/stderr
+exit 1

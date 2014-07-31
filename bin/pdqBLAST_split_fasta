@@ -1,0 +1,12 @@
+#!/bin/tcsh
+
+if ($#argv != 3) then
+	echo "usage: pdqBLAST_split_fasta <temporary directory> <input fasta> <pieces>"
+	exit 1
+endif
+
+set temporary_directory = $argv[1]
+set fasta = $argv[2]
+set pieces = $argv[3]
+
+awk -v pieces=$pieces -v temporary_directory="$temporary_directory" 'BEGIN { chunk = 0; } { if (substr($0, 1, 1) == ">") { chunk++; if (chunk > pieces) chunk = 1; } printf("%s\n", $0) >> temporary_directory "/query_work_unit_" chunk ".fasta"; }' $fasta

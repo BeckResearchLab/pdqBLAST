@@ -1,0 +1,228 @@
+#!/bin/tcsh
+
+set usage = "pdqBLAST -p <blast program> -d <blast database> -i <blast query FASTA> -w <# of work units> -t <threads per work unit> -o <output table> -- [<blast options> ...]"
+if ($#argv == 0) then
+	echo $usage > /dev/stderr
+	exit 1
+endif
+
+# load configuration for pdqBLAST
+if ( ! -r ~/.pdqBLASTrc ) then
+	echo "ERROR: unable to find or read configuration file for pdqBLAST (expected as ~/.pdqBLASTrc)" > /dev/stderr
+	exit 1
+endif
+source ~/.pdqBLASTrc
+
+# parse command line arguments with getopt
+# arguments handled:
+# -p <blast program> (or --program)
+# -d <blast database prefix> (or --blast_db)
+# -i <blast query> (or --input)
+# -w <work units, i.e. number of jobs> (or --work_units)
+# -t <threads per work unit, i.e. threads per blast job> (or --blast_threads
+# -o <output table name> (or --output_table)
+# remaining arguments are the blast command
+set temp = (`getopt -s tcsh -o d:i:w:o:p:t: --long blast_db:input:work_units:output_table:program:blast_threads -- $argv:q`)
+if ($? != 0) then
+	echo "ERROR: argument processing failed" > /dev/stderr
+	exit 1
+endif
+# 
+eval set argv = \($temp:q\)
+#
+while (1)
+	switch ($1:q)
+		case -p:
+		case --program:
+			set program = $2:q
+			shift; shift
+			breaksw;
+		case -d:
+		case --blast_db:
+			set blast_db = $2:q
+			shift; shift
+			breaksw;
+		case -i:
+		case --input:
+			set input = $2:q
+			shift; shift
+			breaksw;
+		case -w:
+		case --work_units:
+			set work_units = $2:q
+			shift; shift
+			breaksw;
+		case -t:
+		case --blast_threads:
+			set blast_threads = $2:q
+			shift; shift
+			breaksw;
+		case -o:
+		case --output_table:
+			set output_table = $2:q
+			shift; shift
+			breaksw;
+		case --:
+			shift
+			break
+		default:
+			echo "ERROR: internal error when processing arguments" > /dev/stderr; exit 1
+	endsw
+end
+#
+# make sure required arguments were present
+if ( ! $?program ) then
+	echo "ERROR: -p or --program argument was not supplied" > /dev/stderr
+	echo $usage > /dev/stderr
+	exit 1
+endif
+if ( ! $?blast_threads ) then
+	echo "ERROR: -t or --blast_threads argument was not supplied" > /dev/stderr
+	echo $usage > /dev/stderr
+	exit 1
+endif
+if ( ! $?blast_db ) then
+	echo "ERROR: -d or --blast_db argument was not supplied" > /dev/stderr
+	echo $usage > /dev/stderr
+	exit 1
+endif
+if ( ! $?input ) then
+	echo "ERROR: -i or --input argument was not supplied" > /dev/stderr
+	echo $usage > /dev/stderr
+	exit 1
+endif
+if ( ! $?work_units ) then
+	echo "ERROR: -w or --work_units argument was not supplied" > /dev/stderr
+	echo $usage > /dev/stderr
+	exit 1
+endif
+if ( ! $?output_table ) then
+	echo "ERROR: -o or --output_table argument was not supplied" > /dev/stderr
+	echo $usage > /dev/stderr
+	exit 1
+endif
+# accumulate remaining arguments for blast
+set blast_arguments = ""
+while ($#argv > 0)
+	set blast_arguments = "$blast_arguments $1:q"
+	shift
+end
+# show arguments
+echo program = $program
+echo blast_arguments = $blast_arguments
+echo blast_threads = $blast_threads
+echo blast_db = $blast_db
+echo input = $input
+echo work_units = $work_units
+echo output_table = $output_table
+
+# sanity checks
+echo checking if table $output_table exists
+# if table already exists, then throw an error
+set temp = `echo "SHOW TABLES LIKE '$output_table';" | mysql -h $PDQBLAST_MYSQL_HOST pdqBLAST | wc -l`
+if ( $temp > 0 ) then
+	echo "ERROR: table $output_table already exists!" > /dev/stderr
+	exit 1
+endif
+# make sure blast program exists
+echo checking if $program exists
+set temp = `which $program`
+if (`echo $temp | sed "s/${program}: //g"` == "Command not found.") then
+	echo "ERROR: command $program was not found in path" > /dev/stderr
+	exit 1
+endif
+# check thread count
+echo if thread count is valid on the lower bound
+if ( $blast_threads < 1 ) then
+	echo "ERROR: requested thread count per work unit is less than 1"
+	exit
+endif
+# make sure input file exists
+echo checking $input fasta file
+if ( ! -r $input ) then
+	echo "ERROR: input FASTA $input does not exist or is not readable" > /dev/stderr
+	exit 1
+endif
+# make sure input looks like a fasta
+set sequences = `awk '/^>/ { print $0 }' $input | wc -l`
+echo found $sequences sequences in file $input
+if ( $sequences < 1 ) then
+	echo "ERROR: input FASTA $input does not look like a FASTA file" > /dev/stderr
+	exit 1
+endif
+# make sure count of sequences in input is greater than work units
+if ( $sequences < $work_units ) then
+	echo "ERROR: found $sequences sequences in input but this is fewer than number of work units specified which was $work_units" > /dev/stderr
+	exit 1
+endif
+# make blast database exists
+set blast_database_files = `find $PDQBLAST_DATABASE_PATH -name "$blast_db.*" -print | wc -l`
+echo found $blast_database_files files matching blast database prefix $blast_db
+if ( $blast_database_files < 1 ) then
+	echo "ERROR: unable to find a BLAST formatted database in $PDQBLAST_DATABASE_PATH with prefix $blast_db" > /dev/stderr
+	exit 1
+endif
+
+# create a new pdqBLAST job
+set job_id = `echo "CALL job_add('$program', $blast_threads, '$blast_arguments', '$blast_db', '$input', $work_units, '$output_table', @new_job_id); SELECT @new_job_id;" | mysql -h $PDQBLAST_MYSQL_HOST -s pdqBLAST`
+if ($job_id == "") then
+	echo "ERROR: unable to allocate a job_id!" > /dev/stderr
+	exit 1
+endif
+echo job_id = $job_id
+
+# create temporary directory name 
+set temporary_directory = `mktemp -d -p $PDQBLAST_TEMPORARY_ROOT pdqBLAST.job_$job_id.XXXXXXXXXX`
+if ( ! -d $temporary_directory ) then
+	echo "ERROR: unable to create temporary directory: $temporary_directory" > /dev/stderr
+	exit 1
+endif
+echo temporary_directory = $temporary_directory
+# create directory to store scheduler job files in
+set temporary_job_directory = $temporary_directory/jobs
+mkdir -p $temporary_job_directory
+# update database with temporary directory name
+echo "CALL job_update_temporary_directory($job_id, '$temporary_directory');" | mysql -h $PDQBLAST_MYSQL_HOST -s pdqBLAST
+
+# split the input fasta into work units
+echo "splitting $input into $work_units chunks into files in $temporary_directory"
+pdqBLAST_split_fasta $temporary_directory $input $work_units
+
+# make a 0README in the temporary directory with the basic job information
+cat << EOF > $temporary_directory/0README
+job_id = $job_id
+
+program = $program
+blast_arguments = $blast_arguments
+blast_threads = $blast_threads
+blast_db = $blast_db
+input = $input
+work_units = $work_units
+output_table = $output_table
+
+temporary_directory = $temporary_directory
+EOF
+
+# make a sourceable file that will populate shell variables
+cat << EOF > $temporary_directory/shell_variables
+set job_id = $job_id
+set program = $program
+set blast_arguments = "$blast_arguments"
+set blast_threads = $blast_threads
+set blast_db = $blast_db
+set input = $input
+set work_units = $work_units
+set output_table = $output_table
+set temporary_directory = $temporary_directory
+set temporary_job_directory = $temporary_job_directory
+EOF
+
+# create input scripts for each work unit
+# load input scripts to database
+# submit input scripts and populate scheduler_id for each work_unit
+set work_unit_list = `seq 1 $work_units`	# WARNING seq needs to become jot on systems like OSX
+foreach work_unit_number ($work_unit_list)
+	$PDQBLAST_SUBMIT_WORK_UNIT_SCRIPT $temporary_directory $work_unit_number
+end
+
+pdqBLAST_update_job_status $job_id waiting

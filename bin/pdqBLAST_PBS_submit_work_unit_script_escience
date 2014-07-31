@@ -1,0 +1,62 @@
+#!/bin/tcsh
+
+# for classic PBS
+set submit_command = qsub
+# for moab
+#set submit_command = msub
+
+# load configuration for pdqBLAST
+if ( ! -r ~/.pdqBLASTrc ) then
+	echo "ERROR: unable to find or read configuration file for pdqBLAST (expected as ~/.pdqBLASTrc)" > /dev/stderr
+	exit 1
+endif
+source ~/.pdqBLASTrc
+
+# validate arguments
+if ( $#argv != 2 ) then
+	echo "usage: pdqBLAST_PBS_submit_work_unit_script <temporary directory> <work unit number>" > /dev/stderr
+	exit 1
+endif
+
+set temporary_directory = $argv[1]
+set work_unit_number = $argv[2]
+
+if ( ! -d $temporary_directory ) then
+	echo "ERROR: unable to find directory $temporary_directory" > /dev/stderr
+	exit 1
+endif
+
+if ( ! -r $temporary_directory/shell_variables ) then
+	echo "ERROR: unable to find file $temporary_directory/shell_variables" > /dev/stderr
+	exit 1
+endif
+
+source $temporary_directory/shell_variables
+
+if ( $work_unit_number < 1 || $work_unit_number > $work_units ) then
+	echo "ERROR: work unit number $work_unit_number is out of range (1 to $work_units)" > /dev/stderr
+	exit 1
+endif
+
+# create submit script
+set script_file = $temporary_directory/work_unit_${work_unit_number}_script.csh
+set work_unit_name = pdqBLAST_${job_id}_${work_unit_number}
+
+cat << EOF > $script_file
+#!/bin/tcsh
+
+#PBS -N "$work_unit_name"
+#PBS -d "$temporary_job_directory"
+#PBS -l walltime=999:99:99,nodes=1:ppn=8,feature=8core
+#PBS -W group_list=hyak-esci
+
+pdqBLAST_execute_work_unit $job_id $work_unit_number $program $blast_threads $blast_db $temporary_directory $blast_arguments
+EOF
+
+chmod +x $script_file
+
+# load the script into the database
+pdqBLAST_load_work_unit_script $job_id $work_unit_number $script_file
+set scheduler_id = `$submit_command $script_file`
+pdqBLAST_update_work_unit_status $job_id $work_unit_number submitted $scheduler_id
+echo "work unit $work_unit_number has scheduler ID $scheduler_id"

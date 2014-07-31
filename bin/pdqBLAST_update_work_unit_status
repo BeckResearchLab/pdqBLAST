@@ -1,0 +1,57 @@
+#!/bin/tcsh
+
+# load configuration for pdqBLAST
+if ( ! -r ~/.pdqBLASTrc ) then
+	echo "ERROR: unable to find or read configuration file for pdqBLAST (expected as ~/.pdqBLASTrc)" > /dev/stderr
+	exit 1
+endif
+source ~/.pdqBLASTrc
+
+# validate arguments
+set usage = "usage: pdqBLAST_update_work_unit_status <job_id> <work_unit_number> <'submitted'|staging'|'running'|'loading'|'cleanup'|'complete'> [<optional arguments for staging> ...]" 
+if ($#argv < 3) then
+	echo $usage > /dev/stderr
+	exit 1
+endif
+
+set job_id = $argv[1]
+set work_unit_number = $argv[2]
+set status = $argv[3]
+
+switch ($status)
+	case submitted:
+		if ($#argv == 4) then
+			set scheduler_id = $argv[4]
+			echo "CALL job_work_unit_status_submitted($job_id, $work_unit_number, '$scheduler_id');" | mysql -h $PDQBLAST_MYSQL_HOST pdqBLAST
+			exit 0
+		endif
+		breaksw;
+	case staging:
+		if ($#argv == 5) then
+			set node = $argv[4]
+			set temporary_directory = $argv[5]
+			echo "CALL job_work_unit_status_staging($job_id, $work_unit_number, '$node', '$temporary_directory');" | mysql -h $PDQBLAST_MYSQL_HOST pdqBLAST
+			exit 0
+		endif
+		breaksw;
+	case running:
+		echo "CALL job_work_unit_status_running($job_id, $work_unit_number);" | mysql -h $PDQBLAST_MYSQL_HOST pdqBLAST
+		exit 0
+		breaksw;
+	case loading:
+		echo "CALL job_work_unit_status_loading($job_id, $work_unit_number);" | mysql -h $PDQBLAST_MYSQL_HOST pdqBLAST
+		exit 0
+		breaksw;
+	case cleanup:
+		echo "CALL job_work_unit_status_cleanup($job_id, $work_unit_number);" | mysql -h $PDQBLAST_MYSQL_HOST pdqBLAST
+		exit 0
+		breaksw;
+	case complete:
+		echo "CALL job_work_unit_status_complete($job_id, $work_unit_number);" | mysql -h $PDQBLAST_MYSQL_HOST pdqBLAST
+		exit 0
+		breaksw;
+	default:
+		breaksw;
+endsw
+echo $usage > /dev/stderr
+exit 1

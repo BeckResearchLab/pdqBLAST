@@ -1,0 +1,14 @@
+#!/bin/tcsh
+
+# location of pdqBLAST installation
+setenv PDQBLAST_HOME /gscratch/escience/dacb/pdqBLAST
+# hostname of MySQL database
+setenv PDQBLAST_MYSQL_HOST n0056
+# location of shared temporary storage
+setenv PDQBLAST_TEMPORARY_ROOT /gscratch/escience/dacb/pdqBLAST/tmp
+# location of blast databases
+setenv PDQBLAST_DATABASE_PATH /gscratch/escience/dacb/data/BLAST_databases
+# location of node local scratch (if not available can use shared scratch, but copies will still take place)
+setenv PDQBLAST_NODE_LOCAL_SCRATCH /scr
+# use the following script as the submit script for local scheduler
+setenv PDQBLAST_SUBMIT_WORK_UNIT_SCRIPT $PDQBLAST_HOME/bin/pdqBLAST_PBS_submit_work_unit_script

@@ -1,0 +1,11 @@
+#!/bin/tcsh
+
+# load configuration for pdqBLAST
+if ( ! -r ~/.pdqBLASTrc ) then
+	echo "ERROR: unable to find or read configuration file for pdqBLAST (expected as ~/.pdqBLASTrc)" > /dev/stderr
+	exit 1
+endif
+source ~/.pdqBLASTrc
+
+mysql -h $PDQBLAST_MYSQL_HOST < $PDQBLAST_HOME/init/init_test.sql
+

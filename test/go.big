@@ -1,0 +1,4 @@
+#!/bin/tcsh
+
+# pdqBLAST -p <blast program> -t <blast threads> -d <blast database> -i <blast query FASTA> -w <# of work units> -o <output table> -- [<blast options> ...]
+pdqBLAST -p blastn -t 8 -d RDP_release10_20 -i big_query.fasta -w 8 -o test_big_output_table --

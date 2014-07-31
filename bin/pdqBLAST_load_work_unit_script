@@ -1,0 +1,21 @@
+#!/bin/tcsh
+
+# load configuration for pdqBLAST
+if ( ! -r ~/.pdqBLASTrc ) then
+	echo "ERROR: unable to find or read configuration file for pdqBLAST (expected as ~/.pdqBLASTrc)" > /dev/stderr
+	exit 1
+endif
+source ~/.pdqBLASTrc
+
+# validate arguments
+set usage = "usage: pdqBLAST_load_work_unit_script <job_id> <work_unit_number> <script filename>"
+if ($#argv != 3) then
+	echo $usage > /dev/stderr
+	exit 1
+endif
+
+set job_id = $argv[1]
+set work_unit_number = $argv[2]
+set script_filename = $argv[3]
+
+echo "CALL job_work_unit_load_script($job_id, $work_unit_number, '$script_filename');" | mysql -h $PDQBLAST_MYSQL_HOST pdqBLAST

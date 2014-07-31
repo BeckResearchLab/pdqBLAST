@@ -1,0 +1,18 @@
+#!/bin/tcsh
+
+# load configuration for pdqBLAST
+if ( ! -r ~/.pdqBLASTrc ) then
+	echo "ERROR: unable to find or read configuration file for pdqBLAST (expected as ~/.pdqBLASTrc)" > /dev/stderr
+	exit 1
+endif
+source ~/.pdqBLASTrc
+
+# at this time, the second argument can only be waiting
+if ($#argv != 2 || $argv[2] != "waiting") then
+	echo "usage: pdqBLAST_update_job_status <job_id> 'waiting'"
+	exit 1
+endif
+
+set job_id = $argv[1]
+
+echo "CALL job_status_waiting($job_id);" | mysql -h $PDQBLAST_MYSQL_HOST pdqBLAST

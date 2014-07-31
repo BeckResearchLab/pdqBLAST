@@ -1,0 +1,6 @@
+#!/bin/tcsh
+
+#pdqBLAST -p blastn -t 8 -d RDP_release10_20 -i /gscratch/lidstrom/data/meta2/methane.fasta -w 42 -o meta.meta2_methane_blast_RDP -- -ungapped -word_size 75
+pdqBLAST -p blastn -t 8 -d RDP_release10_20 -i /gscratch/lidstrom/data/meta2/methanol.fasta -w 42 -o meta.meta2_methanol_blast_RDP -- -ungapped -word_size 75&
+pdqBLAST -p blastn -t 8 -d RDP_release10_20 -i /gscratch/lidstrom/data/meta2/methylamine.fasta -w 42 -o meta.meta2_methylamine_blast_RDP -- -ungapped -word_size 75&
+pdqBLAST -p blastn -t 8 -d RDP_release10_20 -i /gscratch/lidstrom/data/meta2/formaldehyde.fasta -w 42 -o meta.meta2_formaldehyde_blast_RDP -- -ungapped -word_size 75&

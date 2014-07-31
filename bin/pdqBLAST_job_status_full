@@ -1,0 +1,20 @@
+#!/bin/tcsh
+
+# load configuration for pdqBLAST
+if ( ! -r ~/.pdqBLASTrc ) then
+	echo "ERROR: unable to find or read configuration file for pdqBLAST (expected as ~/.pdqBLASTrc)" > /dev/stderr
+	exit 1
+endif
+source ~/.pdqBLASTrc
+
+if ($#argv != 1) then
+	echo "usage: pdqBLAST_job_status <job_id>"
+	exit 1
+endif
+
+set job_id = $argv[1]
+
+echo "CALL job_status($job_id);" | mysql -h $PDQBLAST_MYSQL_HOST pdqBLAST | awk -F'\t' -f$PDQBLAST_HOME/lib/format_results_set.awk -v title="Job status"
+echo ""
+echo "CALL job_work_unit_status($job_id);" | mysql -h $PDQBLAST_MYSQL_HOST pdqBLAST | awk -F'\t' -f$PDQBLAST_HOME/lib/format_results_set.awk -v title="Job work unit status"
+
