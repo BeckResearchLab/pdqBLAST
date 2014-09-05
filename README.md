@@ -1,7 +1,6 @@
-pdqBLAST
-========
-
 Parallel Distributed Query (or pretty damn quick) BLAST allows parallel blast queries to be run without MPI and with true evalue calculation for large query sets
+
+<code>
 File:			Description:
 -----------------------	------------------------------------------------------------------------------------
 0README			This file
@@ -40,3 +39,5 @@ tmp			Where job temporary files reside
 
 # command line used to backup this directory to tar gz in home directory, ignoring tmp
 ( cd .. ; tar -cvzf ~/pdqBLAST.tar.gz pdqBLAST/bin pdqBLAST/init pdqBLAST/lib pdqBLAST/example* pdqBLAST/test pdqBLAST/0README )
+</code>
+
